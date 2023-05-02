@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - topic/timw/update-website-via-action
   schedule:
     - cron: '0 */3 * * *'
 
@@ -14,8 +15,13 @@ jobs:
     env:
       ZKG_DEFAULT_SOURCE: https://zeek-bot:${{ secrets.ZEEK_BOT_TOKEN }}@github.com/${{ github.repository }}
     steps:
-      - name: zkg refresh
+#      - name: zkg refresh
+#        run: |
+#          git config --global user.name zeek-bot
+#          git config --global user.email info@zeek.org
+#          pip3 install zkg && zkg -vvv refresh --aggregate --fail-on-aggregate-problems --push
+      - name: Update packages website
         run: |
-          git config --global user.name zeek-bot
-          git config --global user.email info@zeek.org
-          pip3 install zkg && zkg -vvv refresh --aggregate --fail-on-aggregate-problems --push
+          curl -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
+          -H "Authorization: token ${{ secrets.ZEEK_BOT_TOKEN }}" --request POST \
+          --data '{"event_type": "rebuild_data"}' https://api.github.com/repos/zeek/package-website/dispatches
